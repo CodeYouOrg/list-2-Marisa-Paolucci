@@ -1,0 +1,41 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Grading
+      id: grading
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Grading
+        setup-command: ''
+        command: python3 list2.py
+        input: ''
+        expected-output: |-
+          remove_adjacent
+           OK  got: [1, 2, 3] expected: [1, 2, 3]
+           OK  got: [2, 3] expected: [2, 3]
+           OK  got: [] expected: []
+
+          linear_merge
+           OK  got: ['aa', 'bb', 'cc', 'xx', 'zz'] expected: ['aa', 'bb', 'cc', 'xx', 'zz']
+           OK  got: ['aa', 'bb', 'cc', 'xx', 'zz'] expected: ['aa', 'bb', 'cc', 'xx', 'zz']
+           OK  got: ['aa', 'aa', 'aa', 'bb', 'bb'] expected: ['aa', 'aa', 'aa', 'bb', 'bb']
+        comparison-method: contains
+        timeout: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        GRADING_RESULTS: "${{steps.grading.outputs.result}}"
+      with:
+        runners: grading
